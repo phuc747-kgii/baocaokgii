@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Filter Google Sheet Data</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    th { background: #f3f3f3; }
+    .filter { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h2>Filter Google Sheet Data</h2>
+  <div class="filter">
+    <input type="text" id="name" placeholder="Filter by Name">
+    <input type="text" id="city" placeholder="Filter by City">
+    <button onclick="applyFilter()">Filter</button>
+    <button onclick="resetFilter()">Reset</button>
+  </div>
+  <div id="table-container">Loading...</div>
+
+  <script>
+    // Thay link này bằng link CSV Google Sheet của bạn
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1zA7Z1-lQpNf3aKfQk1lqjE0_abcdefg/gviz/tq?tqx=out:csv&sheet=Sheet1";
+    let rawData = [];
+    let headers = [];
+
+    // Hàm fetch và parse CSV
+    async function loadSheet() {
+      const res = await fetch(SHEET_CSV_URL);
+      const csvText = await res.text();
+      const rows = csvText.trim().split('\n').map(row => row.split(','));
+      headers = rows[0];
+      rawData = rows.slice(1).map(r => r.map(cell => cell.trim()));
+      renderTable(rawData);
+    }
+
+    function renderTable(data) {
+      if (data.length === 0) {
+        document.getElementById("table-container").innerHTML = "<i>No data</i>";
+        return;
+      }
+      let html = "<table><thead><tr>";
+      html += headers.map(h => `<th>${h}</th>`).join('');
+      html += "</tr></thead><tbody>";
+      html += data.map(row => "<tr>" + row.map(cell => `<td>${cell}</td>`).join('') + "</tr>").join('');
+      html += "</tbody></table>";
+      document.getElementById("table-container").innerHTML = html;
+    }
+
+    function applyFilter() {
+      const name = document.getElementById("name").value.trim().toLowerCase();
+      const city = document.getElementById("city").value.trim().toLowerCase();
+      let filtered = rawData.filter(row => {
+        let nameMatch = name === "" || row[0].toLowerCase().includes(name);   // Cột 0 là Name
+        let cityMatch = city === "" || row[2].toLowerCase().includes(city);   // Cột 2 là City
+        return nameMatch && cityMatch;
+      });
+      renderTable(filtered);
+    }
+
+    function resetFilter() {
+      document.getElementById("name").value = "";
+      document.getElementById("city").value = "";
+      renderTable(rawData);
+    }
+
+    loadSheet();
+  </script>
+</body>
+</html>
