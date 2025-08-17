@@ -13,16 +13,17 @@
 <body>
   <h2>Filter Google Sheet Data</h2>
   <div class="filter">
-    <input type="text" id="name" placeholder="Filter by Name">
-    <input type="text" id="city" placeholder="Filter by City">
+    <input type="text" id="Ngay" placeholder="Filter by Ngày">
+    <input type="text" id="Thang" placeholder="Filter by Tháng">
+    <input type="text" id="Nam" placeholder="Filter by Năm">
     <button onclick="applyFilter()">Filter</button>
     <button onclick="resetFilter()">Reset</button>
   </div>
   <div id="table-container">Loading...</div>
 
   <script>
-    // Thay link này bằng link CSV Google Sheet của bạn
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1zA7Z1-lQpNf3aKfQk1lqjE0_abcdefg/gviz/tq?tqx=out:csv&sheet=Sheet1";
+    // Link CSV Google Sheet của bạn - sheet "Data"
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1YmAdEK-QP1RjSa7ohyURPaUSh7HfgrJE/gviz/tq?tqx=out:csv&sheet=Data";
     let rawData = [];
     let headers = [];
 
@@ -50,19 +51,28 @@
     }
 
     function applyFilter() {
-      const name = document.getElementById("name").value.trim().toLowerCase();
-      const city = document.getElementById("city").value.trim().toLowerCase();
+      const ngay = document.getElementById("Ngay").value.trim().toLowerCase();
+      const thang = document.getElementById("Thang").value.trim().toLowerCase();
+      const nam = document.getElementById("Nam").value.trim().toLowerCase();
+
+      // Xác định vị trí các cột "Ngày", "Tháng", "Năm"
+      const idxNgay = headers.findIndex(h => h.trim().toLowerCase() === "ngày");
+      const idxThang = headers.findIndex(h => h.trim().toLowerCase() === "tháng");
+      const idxNam = headers.findIndex(h => h.trim().toLowerCase() === "năm");
+
       let filtered = rawData.filter(row => {
-        let nameMatch = name === "" || row[0].toLowerCase().includes(name);   // Cột 0 là Name
-        let cityMatch = city === "" || row[2].toLowerCase().includes(city);   // Cột 2 là City
-        return nameMatch && cityMatch;
+        let matchNgay = ngay === "" || (idxNgay >= 0 && row[idxNgay].toLowerCase().includes(ngay));
+        let matchThang = thang === "" || (idxThang >= 0 && row[idxThang].toLowerCase().includes(thang));
+        let matchNam = nam === "" || (idxNam >= 0 && row[idxNam].toLowerCase().includes(nam));
+        return matchNgay && matchThang && matchNam;
       });
       renderTable(filtered);
     }
 
     function resetFilter() {
-      document.getElementById("name").value = "";
-      document.getElementById("city").value = "";
+      document.getElementById("Ngay").value = "";
+      document.getElementById("Thang").value = "";
+      document.getElementById("Nam").value = "";
       renderTable(rawData);
     }
 
